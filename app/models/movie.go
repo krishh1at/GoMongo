@@ -28,15 +28,18 @@ func collection() *mongo.Collection {
 	return Collection
 }
 
-func FindMovie(movieId string) (movie Movie) {
+func FindMovie(movieId string) (interface{}, error) {
 	id, _ := primitive.ObjectIDFromHex(movieId)
 	filter := bson.M{"_id": id}
 	cursor, err := collection().Find(context.Background(), filter, nil)
 	if err != nil {
 		log.Fatalln(err)
+		return nil, err
 	}
 
 	defer cursor.Close(context.Background())
+
+	var movie Movie
 	for cursor.Next(context.Background()) {
 		err := cursor.Decode(&movie)
 		if err != nil {
@@ -44,10 +47,10 @@ func FindMovie(movieId string) (movie Movie) {
 		}
 	}
 
-	return movie
+	return movie, nil
 }
 
-func GetAllMovies() []primitive.M {
+func GetAllMovies() (interface{}, error) {
 	cursor, err := collection().Find(context.Background(), bson.D{{}})
 	if err != nil {
 		log.Fatalln(err)
@@ -61,40 +64,43 @@ func GetAllMovies() []primitive.M {
 		err := cursor.Decode(&movie)
 		if err != nil {
 			log.Fatalln(err)
+			return nil, err
 		}
 
 		movies = append(movies, movie)
 	}
 
-	return movies
+	return movies, err
 }
 
-func (movie *Movie) InsertOne() Movie {
+func (movie *Movie) InsertOne() (interface{}, error) {
 	record, err := collection().InsertOne(context.Background(), movie)
 	if err != nil {
 		log.Fatalln(err)
+		return nil, err
 	}
 
 	log.Println("One new movie inserted with ID:", record.InsertedID)
 
-	return *movie
+	return *movie, err
 }
 
-func (movie *Movie) Update(movie_id string) bson.M {
+func (movie *Movie) Update(movie_id string) (interface{}, error) {
 	id, _ := primitive.ObjectIDFromHex(movie_id)
 	filter := bson.M{"_id": id}
 	update := bson.M{"$set": movie}
 	result, err := collection().UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		log.Fatalln(err)
+		return nil, err
 	}
 
 	log.Println("Modified count: ", result.ModifiedCount)
 
-	return bson.M{"_id": id, "updatedResult": result}
+	return bson.M{"_id": id, "updatedResult": result}, nil
 }
 
-func MarkedWatched(movieId string) bson.M {
+func MarkedWatched(movieId string) (interface{}, error) {
 	id, _ := primitive.ObjectIDFromHex(movieId)
 	filter := bson.M{"_id": id}
 	update := bson.M{"$set": bson.M{"watched": true}}
@@ -102,34 +108,37 @@ func MarkedWatched(movieId string) bson.M {
 	result, err := collection().UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		log.Fatalln(err)
+		return nil, err
 	}
 
 	log.Println("Modified count: ", result.ModifiedCount)
 
-	return bson.M{"_id": id, "updatedResult": result}
+	return bson.M{"_id": id, "updatedResult": result}, nil
 }
 
-func DeleteOne(movieId string) bson.M {
+func DeleteOne(movieId string) (interface{}, error) {
 	id, _ := primitive.ObjectIDFromHex(movieId)
 	filter := bson.M{"_id": id}
 
 	result, err := collection().DeleteOne(context.Background(), filter)
 	if err != nil {
 		log.Fatalln(err)
+		return nil, err
 	}
 
 	log.Println("1 movie got deleted ", result)
 
-	return bson.M{"_id": id, "deletedResult": result}
+	return bson.M{"_id": id, "deletedResult": result}, nil
 }
 
-func DeleteAllMovies() bson.M {
+func DeleteAllMovies() (interface{}, error) {
 	result, err := collection().DeleteMany(context.Background(), bson.D{{}}, nil)
 	if err != nil {
 		log.Fatalln(err)
+		return nil, err
 	}
 
 	log.Println("Deleted all records with count: ", result)
 
-	return bson.M{"deletedResult": result}
+	return bson.M{"deletedResult": result}, nil
 }

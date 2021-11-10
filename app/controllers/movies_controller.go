@@ -5,23 +5,25 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/krishh1at/app/helpers"
 	"github.com/krishh1at/app/models"
 )
 
 // Controllers routers methods
 func GetAllMovies(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
 
-	allMovies := models.GetAllMovies()
-	json.NewEncoder(w).Encode(allMovies)
+	result, err := models.GetAllMovies()
+	helpers.RenderJson(w, result, err)
 }
 
 func GetMovie(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	params := mux.Vars(r)
-	movie := models.FindMovie(params["id"])
-	json.NewEncoder(w).Encode(movie)
+	result, err := models.FindMovie(params["id"])
+	helpers.RenderJson(w, result, err)
 }
 
 func CreateMovie(w http.ResponseWriter, r *http.Request) {
@@ -30,8 +32,8 @@ func CreateMovie(w http.ResponseWriter, r *http.Request) {
 
 	var movie models.Movie
 	_ = json.NewDecoder(r.Body).Decode(&movie)
-	movie = movie.InsertOne()
-	json.NewEncoder(w).Encode(movie)
+	result, err := movie.InsertOne()
+	helpers.RenderJson(w, result, err)
 }
 
 func UpdateMovie(w http.ResponseWriter, r *http.Request) {
@@ -41,8 +43,8 @@ func UpdateMovie(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	movie := models.Movie{}
 	_ = json.NewDecoder(r.Body).Decode(&movie)
-	result := movie.Update(params["id"])
-	json.NewEncoder(w).Encode(result)
+	result, err := movie.Update(params["id"])
+	helpers.RenderJson(w, result, err)
 }
 
 func MarkWatchedMovie(w http.ResponseWriter, r *http.Request) {
@@ -50,8 +52,8 @@ func MarkWatchedMovie(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
 
 	params := mux.Vars(r)
-	result := models.MarkedWatched(params["id"])
-	json.NewEncoder(w).Encode(result)
+	result, err := models.MarkedWatched(params["id"])
+	helpers.RenderJson(w, result, err)
 }
 
 func DeleteMovie(w http.ResponseWriter, r *http.Request) {
@@ -59,14 +61,14 @@ func DeleteMovie(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
 
 	params := mux.Vars(r)
-	result := models.DeleteOne(params["id"])
-	json.NewEncoder(w).Encode(result)
+	result, err := models.DeleteOne(params["id"])
+	helpers.RenderJson(w, result, err)
 }
 
 func DeleteAllMovie(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
 
-	result := models.DeleteAllMovies()
-	json.NewEncoder(w).Encode(result)
+	result, err := models.DeleteAllMovies()
+	helpers.RenderJson(w, result, err)
 }
