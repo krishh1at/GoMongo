@@ -9,9 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const colName = "movies"
-
-var Collection *mongo.Collection
+var Database *mongo.Database
 
 func DbConfig() error {
 	log.Println("Connecting to MongoDB...")
@@ -26,7 +24,7 @@ func DbConfig() error {
 	}
 
 	log.Println("MongoDB connected successfully...")
-	Collection = (*mongo.Collection)(client.Database(dbName).Collection(colName))
+	Database = (*mongo.Database)(client.Database(dbName))
 	log.Println("Collection is ready...")
 
 	return nil

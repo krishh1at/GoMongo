@@ -7,7 +7,12 @@ import (
 	"github.com/krishh1at/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
+
+const CollectionName = "movies"
+
+var Collection *mongo.Collection
 
 type Movie struct {
 	ID      primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
@@ -15,10 +20,18 @@ type Movie struct {
 	Watched bool               `json:"watched,omitempty"`
 }
 
+func collection() *mongo.Collection {
+	if Collection == nil {
+		Collection = config.Database.Collection(CollectionName)
+	}
+
+	return Collection
+}
+
 func FindMovie(movieId string) (movie Movie) {
 	id, _ := primitive.ObjectIDFromHex(movieId)
 	filter := bson.M{"_id": id}
-	cursor, err := config.Collection.Find(context.Background(), filter, nil)
+	cursor, err := collection().Find(context.Background(), filter, nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -35,7 +48,7 @@ func FindMovie(movieId string) (movie Movie) {
 }
 
 func GetAllMovies() []primitive.M {
-	cursor, err := config.Collection.Find(context.Background(), bson.D{{}})
+	cursor, err := collection().Find(context.Background(), bson.D{{}})
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -57,7 +70,7 @@ func GetAllMovies() []primitive.M {
 }
 
 func (movie *Movie) InsertOne() Movie {
-	record, err := config.Collection.InsertOne(context.Background(), movie)
+	record, err := collection().InsertOne(context.Background(), movie)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -72,7 +85,7 @@ func MarkedWatched(movieId string) bson.M {
 	filter := bson.M{"_id": id}
 	update := bson.M{"$set": bson.M{"watched": true}}
 
-	result, err := config.Collection.UpdateOne(context.Background(), filter, update)
+	result, err := collection().UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -86,7 +99,7 @@ func DeleteOne(movieId string) bson.M {
 	id, _ := primitive.ObjectIDFromHex(movieId)
 	filter := bson.M{"_id": id}
 
-	result, err := config.Collection.DeleteOne(context.Background(), filter)
+	result, err := collection().DeleteOne(context.Background(), filter)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -97,7 +110,7 @@ func DeleteOne(movieId string) bson.M {
 }
 
 func DeleteAllMovies() bson.M {
-	result, err := config.Collection.DeleteMany(context.Background(), bson.D{{}}, nil)
+	result, err := collection().DeleteMany(context.Background(), bson.D{{}}, nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
