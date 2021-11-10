@@ -11,13 +11,14 @@ import (
 // Controllers routers methods
 func GetAllMovies(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	allMovies := models.GetAllMovies()
 
+	allMovies := models.GetAllMovies()
 	json.NewEncoder(w).Encode(allMovies)
 }
 
 func GetMovie(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
 	params := mux.Vars(r)
 	movie := models.FindMovie(params["id"])
 	json.NewEncoder(w).Encode(movie)
@@ -33,9 +34,21 @@ func CreateMovie(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(movie)
 }
 
+func UpdateMovie(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
+
+	params := mux.Vars(r)
+	movie := models.Movie{}
+	_ = json.NewDecoder(r.Body).Decode(&movie)
+	result := movie.Update(params["id"])
+	json.NewEncoder(w).Encode(result)
+}
+
 func MarkWatchedMovie(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
+
 	params := mux.Vars(r)
 	result := models.MarkedWatched(params["id"])
 	json.NewEncoder(w).Encode(result)

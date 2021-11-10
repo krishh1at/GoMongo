@@ -80,6 +80,20 @@ func (movie *Movie) InsertOne() Movie {
 	return *movie
 }
 
+func (movie *Movie) Update(movie_id string) bson.M {
+	id, _ := primitive.ObjectIDFromHex(movie_id)
+	filter := bson.M{"_id": id}
+	update := bson.M{"$set": movie}
+	result, err := collection().UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println("Modified count: ", result.ModifiedCount)
+
+	return bson.M{"_id": id, "updatedResult": result}
+}
+
 func MarkedWatched(movieId string) bson.M {
 	id, _ := primitive.ObjectIDFromHex(movieId)
 	filter := bson.M{"_id": id}
