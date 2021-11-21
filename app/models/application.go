@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/go-playground/validator"
 	"github.com/krishh1at/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -49,6 +50,24 @@ func Find(object Mongo, Id string) (interface{}, error) {
 	return object, nil
 }
 
+func FindBy(object Mongo, findQuery bson.M) (interface{}, error) {
+	cursor, err := collection(object.CollectionName()).Find(context.Background(), findQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(context.Background())
+
+	for cursor.Next(context.Background()) {
+		err = cursor.Decode(object)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return object, nil
+}
+
 func All(object Mongo) (interface{}, error) {
 	cursor, err := collection(object.CollectionName()).Find(context.Background(), bson.D{{}})
 	if err != nil {
@@ -74,6 +93,13 @@ func All(object Mongo) (interface{}, error) {
 
 func InsertOne(object Mongo) (Mongo, error) {
 	object.AddTimeStamp()
+
+	validate := validator.New()
+	validationError := validate.Struct(object)
+	if validationError != nil {
+		return nil, validationError
+	}
+
 	record, err := collection(object.CollectionName()).InsertOne(context.Background(), object)
 	if err != nil {
 		log.Fatalln(err)
@@ -88,6 +114,13 @@ func InsertOne(object Mongo) (Mongo, error) {
 func Update(object Mongo) (interface{}, error) {
 	filter := bson.M{"_id": object.GetID()}
 	object.AddTimeStamp()
+
+	validate := validator.New()
+	validationError := validate.Struct(object)
+	if validationError != nil {
+		return nil, validationError
+	}
+
 	update := bson.M{"$set": object}
 	result, err := collection(object.CollectionName()).UpdateOne(context.Background(), filter, update)
 	if err != nil {

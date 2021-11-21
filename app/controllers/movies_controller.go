@@ -11,7 +11,6 @@ import (
 
 // Controllers routers methods
 func GetMovies(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 
 	result, err := models.All(&models.Movie{})
@@ -19,14 +18,11 @@ func GetMovies(w http.ResponseWriter, r *http.Request) {
 }
 
 func ShowMovie(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
 	result := GetMovie(w, r)
 	helpers.RenderJson(w, result, nil)
 }
 
 func CreateMovie(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Allow-Control-Allow-Methods", "POST")
 
 	var movie models.Movie
@@ -37,7 +33,6 @@ func CreateMovie(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateMovie(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
 
 	movie := GetMovie(w, r)
@@ -48,7 +43,6 @@ func UpdateMovie(w http.ResponseWriter, r *http.Request) {
 }
 
 func MarkWatchedMovie(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
 
 	movie := GetMovie(w, r)
@@ -57,7 +51,6 @@ func MarkWatchedMovie(w http.ResponseWriter, r *http.Request) {
 }
 
 func DestroyMovie(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
 
 	movie := GetMovie(w, r)
@@ -66,7 +59,6 @@ func DestroyMovie(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteAllMovie(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
 
 	result, err := models.DeleteAll(&models.Movie{})

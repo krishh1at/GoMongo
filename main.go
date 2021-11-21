@@ -25,6 +25,6 @@ func main() {
 	log.Println("Server is getting started...")
 
 	r := routers.Router()
-	log.Println("Server has started at port: 8080. To exit please press Ctr+C.")
+	log.Println("Server has started at port: 8080. To exit please press Ctr+C.\n")
 	log.Fatalln(http.ListenAndServe(":8080", r))
 }
