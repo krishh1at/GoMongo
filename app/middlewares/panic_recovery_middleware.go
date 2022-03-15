@@ -15,8 +15,9 @@ func PanicRecovery(handler http.Handler) http.Handler {
 				buf = buf[:n]
 
 				fmt.Printf("recovering from error %v\n %s", err, buf)
-				w.Write([]byte(`{"errors":"our server got panic"}`))
 				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(`{"errors":"our server got panic"}`))
+				return
 			}
 		}()
 

@@ -24,7 +24,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 
 	err := user.Verify()
 	if err != nil {
-		err = errors.New("User doesn't exist!")
+		err = errors.New("invalid email id or password")
 	}
 
 	helpers.RenderJson(w, map[string]string{"success": "Signed In successfully!"}, err)

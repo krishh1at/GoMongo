@@ -69,7 +69,8 @@ func FindBy(object Mongo, findQuery bson.M) (interface{}, error) {
 }
 
 func All(object Mongo) (interface{}, error) {
-	cursor, err := collection(object.CollectionName()).Find(context.Background(), bson.D{{}})
+	collectionName := object.CollectionName()
+	cursor, err := collection(collectionName).Find(context.Background(), bson.D{{}})
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -88,7 +89,8 @@ func All(object Mongo) (interface{}, error) {
 		objects = append(objects, object)
 	}
 
-	return objects, err
+	result := map[string]interface{}{collectionName: objects}
+	return result, err
 }
 
 func InsertOne(object Mongo) (Mongo, error) {
