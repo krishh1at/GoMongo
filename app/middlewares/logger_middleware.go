@@ -11,7 +11,9 @@ func Logger(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestHeader := ""
 		for k, v := range r.Header {
-			requestHeader += fmt.Sprintf("{ %s => %s }", k, v)
+			if k != "Authorization" {
+				requestHeader += fmt.Sprintf("{ %s => %s }", k, v)
+			}
 		}
 
 		loggerInfo := fmt.Sprintf("Started: %s %s %s%s | Request.Header [%s]", r.Proto, r.Method, r.Host, r.URL.Path, requestHeader)

@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"runtime"
 )
@@ -14,9 +14,9 @@ func PanicRecovery(handler http.Handler) http.Handler {
 				n := runtime.Stack(buf, false)
 				buf = buf[:n]
 
-				fmt.Printf("recovering from error %v\n %s", err, buf)
+				log.Printf("recovering from error %v\n %s", err, buf)
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(`{"errors":"our server got panic"}`))
+				w.Write([]byte(`{"errors": "Something went wrong."}`))
 				return
 			}
 		}()
