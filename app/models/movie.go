@@ -46,8 +46,10 @@ func (movie *Movie) MarkedWatched() (*Movie, error) {
 
 	result, err := collection("movies").UpdateOne(context.Background(), filter, update)
 	if err != nil {
-		log.Fatalln(err)
+		log.Panicln("Error while updating the movie record: ", err)
 		return nil, err
+	} else {
+		movie.Watched = true
 	}
 
 	log.Println("Modified count: ", result.ModifiedCount)

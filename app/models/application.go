@@ -28,13 +28,10 @@ func collection(collectionName string) *mongo.Collection {
 	return Collection
 }
 
-func Find(object Mongo, Id string) (interface{}, error) {
-	id, _ := primitive.ObjectIDFromHex(Id)
-	filter := bson.M{"_id": id}
-
-	cursor, err := collection(object.CollectionName()).Find(context.Background(), filter)
+func FindBy(object Mongo, findQuery bson.M) (interface{}, error) {
+	cursor, err := collection(object.CollectionName()).Find(context.Background(), findQuery)
 	if err != nil {
-		log.Fatalln(err)
+		log.Panicln("Error while find records: ", err)
 		return nil, err
 	}
 
@@ -43,6 +40,7 @@ func Find(object Mongo, Id string) (interface{}, error) {
 	for cursor.Next(context.Background()) {
 		err = cursor.Decode(object)
 		if err != nil {
+			log.Panicln("Error while decoding the records: ", err)
 			return nil, err
 		}
 	}
@@ -50,28 +48,20 @@ func Find(object Mongo, Id string) (interface{}, error) {
 	return object, nil
 }
 
-func FindBy(object Mongo, findQuery bson.M) (interface{}, error) {
-	cursor, err := collection(object.CollectionName()).Find(context.Background(), findQuery)
-	if err != nil {
-		return nil, err
-	}
+func Find(object Mongo, Id string) (interface{}, error) {
+	id, _ := primitive.ObjectIDFromHex(Id)
+	filter := bson.M{"_id": id}
 
-	defer cursor.Close(context.Background())
+	result, err := FindBy(object, filter)
 
-	for cursor.Next(context.Background()) {
-		err = cursor.Decode(object)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return object, nil
+	return result, err
 }
 
 func All(object Mongo) (interface{}, error) {
 	collectionName := object.CollectionName()
 	cursor, err := collection(collectionName).Find(context.Background(), bson.D{{}})
 	if err != nil {
+		log.Panicln("Error while find records: ", err)
 		log.Fatalln(err)
 	}
 
@@ -82,7 +72,7 @@ func All(object Mongo) (interface{}, error) {
 		var object bson.M
 		err := cursor.Decode(&object)
 		if err != nil {
-			log.Fatalln(err)
+			log.Panicln("Error while decoding the records: ", err)
 			return nil, err
 		}
 
@@ -104,11 +94,11 @@ func InsertOne(object Mongo) (Mongo, error) {
 
 	record, err := collection(object.CollectionName()).InsertOne(context.Background(), object)
 	if err != nil {
-		log.Fatalln(err)
+		log.Panicln("Error while inserting the record: ", err)
 		return nil, err
 	}
 
-	log.Println("One new movie inserted with ID:", record.InsertedID)
+	log.Println("One record inserted with ID:", record.InsertedID)
 	object.SetID(record.InsertedID.(primitive.ObjectID))
 	return object, err
 }
@@ -126,7 +116,7 @@ func Update(object Mongo) (interface{}, error) {
 	update := bson.M{"$set": object}
 	result, err := collection(object.CollectionName()).UpdateOne(context.Background(), filter, update)
 	if err != nil {
-		log.Fatalln(err)
+		log.Panicln("Error while updating the record: ", err)
 		return nil, err
 	}
 
@@ -140,7 +130,7 @@ func Destroy(object Mongo) (interface{}, error) {
 
 	result, err := collection(object.CollectionName()).DeleteOne(context.Background(), filter)
 	if err != nil {
-		log.Fatalln(err)
+		log.Panicln("Error while deleting the record: ", err)
 		return nil, err
 	}
 
@@ -152,7 +142,7 @@ func Destroy(object Mongo) (interface{}, error) {
 func DeleteAll(object Mongo) (interface{}, error) {
 	result, err := collection(object.CollectionName()).DeleteMany(context.Background(), bson.D{{}}, nil)
 	if err != nil {
-		log.Fatalln(err)
+		log.Panicln("Error while deleting the records: ", err)
 		return nil, err
 	}
 

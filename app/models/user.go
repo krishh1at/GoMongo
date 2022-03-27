@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/base64"
 	"errors"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,7 +19,6 @@ type User struct {
 	PhoneNumber     *string            `json:"phoneNumber,omitempty" validate:"required"`
 	Password        *string            `json:"password,omitempty" validate:"required,min=6"`
 	ConfirmPassword *string            `json:"confirmPassword"`
-	Token           *string            `json:"token"`
 	CreatedAt       time.Time          `json:"createdAt,omitempty" validate:"required"`
 	UpdatedAt       time.Time          `json:"updatedAt,omitempty" validate:"required"`
 }
@@ -51,6 +51,7 @@ func (user *User) AddTimeStamp() {
 func (user *User) encrypt() (*User, error) {
 	encryptedPass, err := bcrypt.GenerateFromPassword([]byte(*user.Password), bcrypt.DefaultCost)
 	if err != nil {
+		log.Panicln("Error while encryption of password: ", err)
 		return user, err
 	}
 
@@ -93,30 +94,34 @@ func (user *User) CreateUser() (*User, error) {
 	return result.(*User), err
 }
 
-func (user *User) Verify() error {
+func (user *User) Verify() (*User, error) {
 	existingUser := &User{}
 	result, err := FindBy(existingUser, bson.M{"email": *user.Email})
+
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if result != nil {
+	if result.(*User).ID != existingUser.ID {
+		return nil, errors.New("User doesn't exist.")
+	} else {
 		existingUser = result.(*User)
 
 		if existingUser.Email != nil && *existingUser.Email != *user.Email {
-			return errors.New("User doesn't exist.")
+			return nil, errors.New("User doesn't exist.")
 		}
 	}
 
 	pass, err := base64.StdEncoding.DecodeString(*existingUser.Password)
 	if err != nil {
-		return err
+		log.Panicln("Error while decoding of encrypted password: ", err)
+		return nil, err
 	}
 
 	err = bcrypt.CompareHashAndPassword(pass, []byte(*user.Password))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return existingUser, nil
 }
