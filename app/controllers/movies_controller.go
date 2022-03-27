@@ -11,8 +11,6 @@ import (
 
 // Get All movies list API
 func GetMovies(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-
 	result, err := models.All(&models.Movie{})
 	helpers.RenderJson(w, result, err)
 }

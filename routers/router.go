@@ -9,6 +9,18 @@ import (
 func Router() *mux.Router {
 	router := mux.NewRouter()
 
+	// articles controller
+	router.Handle(
+		"/api/articles",
+		middlewares.Handler(controllers.GetArticles),
+	).Methods("GET")
+
+	// Authenticated user allowed
+	router.Handle(
+		"/api/articles",
+		middlewares.AuthHandler(controllers.CreateArticle),
+	).Methods("POST")
+
 	// users controller
 	router.Handle(
 		"/api/signup",
@@ -20,13 +32,13 @@ func Router() *mux.Router {
 		middlewares.Handler(controllers.SignIn),
 	).Methods("POST")
 
-	//Authenticated user allowed
+	// Authenticated user allowed
 	router.Handle(
 		"/api/users/{id}",
 		middlewares.AuthHandler(controllers.UpdateUser),
 	).Methods("PUT")
 
-	//movies controller
+	// movies controller
 	router.Handle(
 		"/api/movies",
 		middlewares.Handler(controllers.GetMovies),
@@ -37,7 +49,7 @@ func Router() *mux.Router {
 		middlewares.Handler(controllers.GetMovie),
 	).Methods("GET")
 
-	//Authenticated user allowed
+	// Authenticated user allowed
 	router.Handle(
 		"/api/movies",
 		middlewares.AuthHandler(controllers.CreateMovie),
