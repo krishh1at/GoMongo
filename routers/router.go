@@ -20,9 +20,10 @@ func Router() *mux.Router {
 		middlewares.Handler(controllers.SignIn),
 	).Methods("POST")
 
+	//Authenticated user allowed
 	router.Handle(
 		"/api/users/{id}",
-		middlewares.Handler(controllers.UpdateUser),
+		middlewares.AuthHandler(controllers.UpdateUser),
 	).Methods("PUT")
 
 	//movies controller
@@ -33,32 +34,33 @@ func Router() *mux.Router {
 
 	router.Handle(
 		"/api/movies/{id}",
-		middlewares.Handler(controllers.ShowMovie),
+		middlewares.Handler(controllers.GetMovie),
 	).Methods("GET")
 
+	//Authenticated user allowed
 	router.Handle(
 		"/api/movies",
-		middlewares.Handler(controllers.CreateMovie),
+		middlewares.AuthHandler(controllers.CreateMovie),
 	).Methods("POST")
 
 	router.Handle(
 		"/api/movies/{id}",
-		middlewares.Handler(controllers.UpdateMovie),
+		middlewares.AuthHandler(controllers.UpdateMovie),
 	).Methods("PUT")
 
 	router.Handle(
 		"/api/movies/{id}/watched",
-		middlewares.Handler(controllers.MarkWatchedMovie),
+		middlewares.AuthHandler(controllers.MarkWatchedMovie),
 	).Methods("PUT")
 
 	router.Handle(
 		"/api/movies/{id}",
-		middlewares.Handler(controllers.DestroyMovie),
+		middlewares.AuthHandler(controllers.DestroyMovie),
 	).Methods("DELETE")
 
 	router.Handle(
 		"/api/movies",
-		middlewares.Handler(controllers.DeleteAllMovie),
+		middlewares.AuthHandler(controllers.DeleteAllMovie),
 	).Methods("DELETE")
 
 	return router
