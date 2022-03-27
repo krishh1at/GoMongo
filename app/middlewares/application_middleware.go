@@ -32,3 +32,17 @@ func Handler(handler func(http.ResponseWriter, *http.Request)) http.Handler {
 
 	return chain
 }
+
+func AuthHandler(handler func(http.ResponseWriter, *http.Request)) http.Handler {
+	myHandler := http.HandlerFunc(handler)
+
+	chain := CreateChain(
+		PanicRecovery,
+		Logger,
+		FilterContentType,
+		SetContentType,
+		VerifyJWT,
+	).Then(myHandler)
+
+	return chain
+}
