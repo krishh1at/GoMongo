@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -10,26 +9,7 @@ import (
 	"github.com/krishh1at/app/models"
 )
 
-func SignUp(w http.ResponseWriter, r *http.Request) {
-	user := &models.User{}
-	json.NewDecoder(r.Body).Decode(user)
-
-	result, err := user.CreateUser()
-	helpers.RenderJson(w, result, err)
-}
-
-func SignIn(w http.ResponseWriter, r *http.Request) {
-	user := &models.User{}
-	json.NewDecoder(r.Body).Decode(user)
-
-	err := user.Verify()
-	if err != nil {
-		err = errors.New("invalid email id or password")
-	}
-
-	helpers.RenderJson(w, map[string]string{"success": "Signed In successfully!"}, err)
-}
-
+// Update User API
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	user := GetUser(w, r)
 	json.NewDecoder(r.Body).Decode(user)
@@ -38,6 +18,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	helpers.RenderJson(w, result, err)
 }
 
+// GET User API
 func GetUser(w http.ResponseWriter, r *http.Request) *models.User {
 	params := mux.Vars(r)
 	result, err := models.Find(&models.User{}, params["id"])
